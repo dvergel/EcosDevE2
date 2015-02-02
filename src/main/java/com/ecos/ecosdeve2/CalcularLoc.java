@@ -21,9 +21,12 @@ import java.util.regex.Pattern;
  */
 public class CalcularLoc {
 
-    private int indexClass=0;
-    private int indexMetodos=0;
-    private BigInteger contadorLoc;
+    private int indexClass = 0;
+    private int indexMetodos = 0;
+    private BigInteger contadorLMod=BigInteger.ZERO;
+    private BigInteger contadorLEli=BigInteger.ZERO;
+    private BigInteger contadorLoc=BigInteger.ZERO;
+    private List<BigInteger> contadorLocClases = new ArrayList<BigInteger>();
     private List<BigInteger> contadorClases = new ArrayList<BigInteger>();
     private List<BigInteger> contadorAtributos = new ArrayList<BigInteger>();
     private List<BigInteger> contadorMetodos = new ArrayList<BigInteger>();
@@ -32,9 +35,9 @@ public class CalcularLoc {
     private List<List<List<String>>> parametrosMetodos = new ArrayList<List<List<String>>>();
     private List<List<String>> nombreAtributos = new ArrayList<List<String>>();
 
-    public void leerRuta(String ruta) throws Exception {
+    public void leerRuta(String ruta,String separador) throws Exception {
         try {
-            
+
             File path = new File(ruta);
             String[] ficheros = path.list();
             FileInputStream fstream;
@@ -47,7 +50,7 @@ public class CalcularLoc {
 
                 for (int x = 0; x < ficheros.length; x++) {
                     if (ficheros[x].toLowerCase().contains(".java")) {
-                        fstream = new FileInputStream(ficheros[x]);
+                        fstream = new FileInputStream(ruta+separador+ficheros[x]);//m
                         entrada = new DataInputStream(fstream);
                         buffer = new BufferedReader(new InputStreamReader(entrada));
                         while ((strLinea = buffer.readLine()) != null) {
@@ -62,33 +65,44 @@ public class CalcularLoc {
         }
     }
 
-    public void SumarVariables(String linea) {
+    private void SumarVariables(String linea) {
         Pattern pt = Pattern.compile("^(?![ \\s]*\\r?\\n|import|package|[ \\s]*}\\r?\\n|[ \\s]*//|[ \\s]*/\\*|[ \\s]*\\*).*\\r?\\n", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pt.matcher(linea);
         while (matcher.find()) {
+            contadorLocClases.set(indexClass, contadorLocClases.get(indexClass).add(BigInteger.ONE));
             contadorLoc.add(BigInteger.ONE);
         }
-        pt = Pattern.compile("(?<Access>public\\s|private\\s|protected\\s)(class)+[\\s\\w]*\\s+(?<className>\\w+)", Pattern.CASE_INSENSITIVE);
+        pt = Pattern.compile("(public\\s|private\\s|protected\\s)(class)+[\\s\\w]*\\s+(\\w+)", Pattern.CASE_INSENSITIVE);
         matcher = pt.matcher(linea);
         while (matcher.find()) {
             indexClass++;
-            indexMetodos=0;
-            contadorClases.add(indexClass,contadorClases.get(indexClass).add(BigInteger.ONE));
-            nombreClases.get(indexClass).add(matcher.group(0)+" "+matcher.group(1));
+            nombreClases.add(new ArrayList<String>());
+            nombreAtributos.add(new ArrayList<String>());
+            nombreMetodos.add(new ArrayList<String>());
+            parametrosMetodos.add(new ArrayList<List<String>>());
+            indexMetodos = 0;
+            contadorClases.add(indexClass, contadorClases.get(indexClass).add(BigInteger.ONE));
+            nombreClases.get(indexClass).add(matcher.group(0) + " " + matcher.group(1));
         }
-        pt = Pattern.compile("(?<Access>public\\s|private\\s|protected\\s)\\s*(?:readonly\\s+)?(?!class)(?<type>[a-zA-Z0-9]*<?[a-zA-Z0-9]*>?+)\\s+(?<AtrrName>\\w+)", Pattern.CASE_INSENSITIVE);
+        pt = Pattern.compile("(public\\s|private\\s|protected\\s)\\s*(?:readonly\\s+)?(?!class)([a-zA-Z0-9]*<?[a-zA-Z0-9]*>?+)\\s+(\\w+)", Pattern.CASE_INSENSITIVE);
         matcher = pt.matcher(linea);
         while (matcher.find()) {
-            contadorAtributos.add(indexClass,contadorAtributos.get(indexClass).add(BigInteger.ONE));
-            nombreAtributos.get(indexClass).add(matcher.group(0)+" "+matcher.group(1)+" "+matcher.group(2));
+            contadorAtributos.add(indexClass, contadorAtributos.get(indexClass).add(BigInteger.ONE));
+            nombreAtributos.get(indexClass).add(matcher.group(0) + " " + matcher.group(1) + " " + matcher.group(2));
         }
-        pt = Pattern.compile("(?<Access>public\\s|private\\s|protected\\s|internal\\s)?(?<return>[\\s\\w]*)\\s+(?<methodName>\\w+)\\s*\\(\\s*(?:(ref\\s|in\\s|out\\s)?\\s*(?<parameterType>\\w+)\\s+(?<parameter>\\w+)\\s*,?\\s*)+\\)", Pattern.CASE_INSENSITIVE);
+        pt = Pattern.compile("(public\\s|private\\s|protected\\s|internal\\s)?([\\s\\w]*)\\s+(\\w+)\\s*\\(\\s*(?:(ref\\s|in\\s|out\\s)?\\s*(\\w+)\\s+(\\w+)\\s*,?\\s*)+\\)", Pattern.CASE_INSENSITIVE);
         matcher = pt.matcher(linea);
         while (matcher.find()) {
             indexMetodos++;
-            contadorMetodos.add(indexClass,contadorMetodos.get(indexClass).add(BigInteger.ONE));
-            nombreMetodos.get(indexClass).add(matcher.group(0)+" "+matcher.group(1)+" "+matcher.group(2));
-            parametrosMetodos.get(indexClass).get(indexMetodos).add(matcher.group(3)+" "+matcher.group(4));
+            contadorMetodos.add(indexClass, contadorMetodos.get(indexClass).add(BigInteger.ONE));
+            nombreMetodos.get(indexClass).add(matcher.group(0) + " " + matcher.group(1) + " " + matcher.group(2));
+            parametrosMetodos.get(indexClass).get(indexMetodos).add(matcher.group(3) + " " + matcher.group(4));
+        }
+        if (linea.toLowerCase().contains("//m")) {
+            contadorLMod.add(BigInteger.ONE);
+        }
+        if (linea.toLowerCase().contains("//e")) {
+            contadorLEli.add(BigInteger.ONE);
         }
     }
 
@@ -99,8 +113,6 @@ public class CalcularLoc {
     public void setContadorLoc(BigInteger contadorLoc) {
         this.contadorLoc = contadorLoc;
     }
-
-
 
     public List<BigInteger> getContadorClases() {
         return contadorClases;
@@ -156,7 +168,7 @@ public class CalcularLoc {
 
     public void setNombreAtributos(List<List<String>> nombreAtributos) {
         this.nombreAtributos = nombreAtributos;
-    } 
+    }
 
     public int getIndexClass() {
         return indexClass;
@@ -173,5 +185,28 @@ public class CalcularLoc {
     public void setIndexMetodos(int indexMetodos) {
         this.indexMetodos = indexMetodos;
     }
-    
+
+    public List<BigInteger> getContadorLocClases() {
+        return contadorLocClases;
+    }
+
+    public void setContadorLocClases(List<BigInteger> contadorLocClases) {
+        this.contadorLocClases = contadorLocClases;
+    }
+
+    public BigInteger getContadorLMod() {
+        return contadorLMod;
+    }
+
+    public void setContadorLMod(BigInteger contadorLMod) {
+        this.contadorLMod = contadorLMod;
+    }
+
+    public BigInteger getContadorLEli() {
+        return contadorLEli;
+    }
+
+    public void setContadorLEli(BigInteger contadorLEli) {
+        this.contadorLEli = contadorLEli;
+    }
 }
