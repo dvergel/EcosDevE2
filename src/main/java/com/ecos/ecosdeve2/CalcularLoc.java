@@ -21,11 +21,11 @@ import java.util.regex.Pattern;
  */
 public class CalcularLoc {
 
-    private int indexClass = 0;
-    private int indexMetodos = 0;
-    private BigInteger contadorLMod=BigInteger.ZERO;
-    private BigInteger contadorLEli=BigInteger.ZERO;
-    private BigInteger contadorLoc=BigInteger.ZERO;
+    private int indexClass = -1;
+    private int indexMetodos = -1;
+    private BigInteger contadorLMod = BigInteger.ZERO;
+    private BigInteger contadorLEli = BigInteger.ZERO;
+    private BigInteger contadorLoc = BigInteger.ZERO;
     private List<BigInteger> contadorLocClases = new ArrayList<BigInteger>();
     private List<BigInteger> contadorClases = new ArrayList<BigInteger>();
     private List<BigInteger> contadorAtributos = new ArrayList<BigInteger>();
@@ -35,7 +35,7 @@ public class CalcularLoc {
     private List<List<List<String>>> parametrosMetodos = new ArrayList<List<List<String>>>();
     private List<List<String>> nombreAtributos = new ArrayList<List<String>>();
 
-    public void leerRuta(String ruta,String separador) throws Exception {
+    public void leerRuta(String ruta, String separador) throws Exception {
         try {
 
             File path = new File(ruta);
@@ -50,7 +50,7 @@ public class CalcularLoc {
 
                 for (int x = 0; x < ficheros.length; x++) {
                     if (ficheros[x].toLowerCase().contains(".java")) {
-                        fstream = new FileInputStream(ruta+separador+ficheros[x]);//m
+                        fstream = new FileInputStream(ruta + separador + ficheros[x]);//m
                         entrada = new DataInputStream(fstream);
                         buffer = new BufferedReader(new InputStreamReader(entrada));
                         while ((strLinea = buffer.readLine()) != null) {
@@ -66,37 +66,50 @@ public class CalcularLoc {
     }
 
     private void SumarVariables(String linea) {
+        boolean flag = true;
         Pattern pt = Pattern.compile("^(?![ \\s]*\\r?\\n|import|package|[ \\s]*}\\r?\\n|[ \\s]*//|[ \\s]*/\\*|[ \\s]*\\*).*\\r?\\n", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pt.matcher(linea);
         while (matcher.find()) {
             contadorLocClases.set(indexClass, contadorLocClases.get(indexClass).add(BigInteger.ONE));
             contadorLoc.add(BigInteger.ONE);
         }
-        pt = Pattern.compile("(public\\s|private\\s|protected\\s)(class)+[\\s\\w]*\\s+(\\w+)", Pattern.CASE_INSENSITIVE);
-        matcher = pt.matcher(linea);
-        while (matcher.find()) {
-            indexClass++;
-            nombreClases.add(new ArrayList<String>());
-            nombreAtributos.add(new ArrayList<String>());
-            nombreMetodos.add(new ArrayList<String>());
-            parametrosMetodos.add(new ArrayList<List<String>>());
-            indexMetodos = 0;
-            contadorClases.add(indexClass, contadorClases.get(indexClass).add(BigInteger.ONE));
-            nombreClases.get(indexClass).add(matcher.group(0) + " " + matcher.group(1));
+        if (flag) {
+            pt = Pattern.compile("(public\\s|private\\s|protected\\s)(class)+([\\s\\w]*\\s)+(\\w+)", Pattern.CASE_INSENSITIVE);
+            matcher = pt.matcher(linea);
+            while (matcher.find()) {
+                indexClass++;
+                nombreClases.add(new ArrayList<String>());
+                nombreAtributos.add(new ArrayList<String>());
+                nombreMetodos.add(new ArrayList<String>());
+                contadorClases.add(BigInteger.ZERO);
+                contadorAtributos.add(BigInteger.ZERO);
+                contadorMetodos.add(BigInteger.ZERO);
+                parametrosMetodos.add(new ArrayList<List<String>>());
+                indexMetodos = 0;
+                contadorClases.add(indexClass, contadorClases.get(indexClass).add(BigInteger.ONE));
+                nombreClases.get(indexClass).add(matcher.group(1) + matcher.group(2)+ " " + matcher.group(4));
+                flag = false;
+            }
         }
-        pt = Pattern.compile("(public\\s|private\\s|protected\\s)\\s*(?:readonly\\s+)?(?!class)([a-zA-Z0-9]*<?[a-zA-Z0-9]*>?+)\\s+(\\w+)", Pattern.CASE_INSENSITIVE);
-        matcher = pt.matcher(linea);
-        while (matcher.find()) {
-            contadorAtributos.add(indexClass, contadorAtributos.get(indexClass).add(BigInteger.ONE));
-            nombreAtributos.get(indexClass).add(matcher.group(0) + " " + matcher.group(1) + " " + matcher.group(2));
+        if (flag) {
+            pt = Pattern.compile("(public\\s|private\\s|protected\\s)\\s*(?:readonly\\s+)?(?!class)([a-zA-Z0-9]*<?[a-zA-Z0-9]*>?+)\\s+(\\w+)", Pattern.CASE_INSENSITIVE);
+            matcher = pt.matcher(linea);
+            while (matcher.find()) {
+                contadorAtributos.add(indexClass, contadorAtributos.get(indexClass).add(BigInteger.ONE));
+                nombreAtributos.get(indexClass).add(matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3));
+                flag = false;
+            }
         }
-        pt = Pattern.compile("(public\\s|private\\s|protected\\s|internal\\s)?([\\s\\w]*)\\s+(\\w+)\\s*\\(\\s*(?:(ref\\s|in\\s|out\\s)?\\s*(\\w+)\\s+(\\w+)\\s*,?\\s*)+\\)", Pattern.CASE_INSENSITIVE);
-        matcher = pt.matcher(linea);
-        while (matcher.find()) {
-            indexMetodos++;
-            contadorMetodos.add(indexClass, contadorMetodos.get(indexClass).add(BigInteger.ONE));
-            nombreMetodos.get(indexClass).add(matcher.group(0) + " " + matcher.group(1) + " " + matcher.group(2));
-            parametrosMetodos.get(indexClass).get(indexMetodos).add(matcher.group(3) + " " + matcher.group(4));
+        if (flag) {
+            pt = Pattern.compile("(public\\s|private\\s|protected\\s|internal\\s)?([\\s\\w]*)\\s+(\\w+)\\s*\\(\\s*(?:(ref\\s|in\\s|out\\s)?\\s*(\\w+)\\s+(\\w+)\\s*,?\\s*)+\\)", Pattern.CASE_INSENSITIVE);
+            matcher = pt.matcher(linea);
+            while (matcher.find()) {
+                indexMetodos++;
+                contadorMetodos.add(indexClass, contadorMetodos.get(indexClass).add(BigInteger.ONE));
+                nombreMetodos.get(indexClass).add(matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3));
+                parametrosMetodos.get(indexClass).get(indexMetodos).add(matcher.group(4) + " " + matcher.group(5));
+                flag = false;
+            }
         }
         if (linea.toLowerCase().contains("//m")) {
             contadorLMod.add(BigInteger.ONE);

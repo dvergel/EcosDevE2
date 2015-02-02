@@ -21,9 +21,10 @@ public class Main extends HttpServlet {
             throws ServletException, IOException {
         CalcularLoc e1 = new CalcularLoc();
         CalcularLoc e2 = new CalcularLoc();
+        resp.setContentType("text/html");
         try {
             e1.leerRuta("src" + sSeparator + "main" + sSeparator + "java" + sSeparator + "com" + sSeparator + "ecos" + sSeparator + "ecosdeve1"+ sSeparator,sSeparator);//m
-            //e2.leerRuta("src" + sSeparator + "main" + sSeparator + "java" + sSeparator + "com" + sSeparator + "ecos" + sSeparator + "ecosdeve2"+ sSeparator,sSeparator);//m
+            e2.leerRuta("src" + sSeparator + "main" + sSeparator + "java" + sSeparator + "com" + sSeparator + "ecos" + sSeparator + "ecosdeve2"+ sSeparator,sSeparator);//m
             resp.getWriter().println("Medicion de LOC");
             resp.getWriter().println("<table style='width:100%'>");
             resp.getWriter().println("<tr>");
@@ -34,17 +35,17 @@ public class Main extends HttpServlet {
             resp.getWriter().println("<td>Total de la parte</td>");
             resp.getWriter().println("<td>Total tamaño</td>");
             resp.getWriter().println("</tr>");
-            resp.getWriter().println("</table>");
             for (int x = 0; x < e1.getNombreClases().size(); x++) {
                 resp.getWriter().println("<tr>");
                 resp.getWriter().println("<td>1</td>");
                 resp.getWriter().println("<td>Clase</td>");
-                resp.getWriter().println("<td>"+e1.getNombreClases().get(x) +"</td>");
+                resp.getWriter().println("<td>"+e1.getNombreClases().get(x).toString() +"</td>");
                 resp.getWriter().println("<td>Numero de items</td>");
-                resp.getWriter().println("<td>"+ e1.getContadorLocClases().get(x) +"</td>");
+                resp.getWriter().println("<td>"+ e1.getContadorLocClases().get(x).toString() +"</td>");
                 resp.getWriter().println("<td></td>");
                 resp.getWriter().println("</tr>");
             }
+            resp.getWriter().println("</table>");
         } catch (Exception e) {
             resp.getWriter().print("Ocurrio un Error : " + e.getMessage());
         }
