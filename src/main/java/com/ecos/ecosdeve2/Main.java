@@ -22,11 +22,26 @@ public class Main extends HttpServlet {
         CalcularLoc e1 = new CalcularLoc();
         CalcularLoc e2 = new CalcularLoc();
         resp.setContentType("text/html");
+        resp.getWriter().println("<style type=\"text/css\">");
+        resp.getWriter().println(".myTable { background-color:#eee;border-collapse:collapse; }");
+        resp.getWriter().println(".myTable th { background-color:#000;color:white;width:50%; }");
+        resp.getWriter().println(".myTable td, .myTable th { padding:5px;border:1px solid #000; }");
+        resp.getWriter().println("</style>");
+
+        resp.getWriter().println("<style type=\"text/css\">");
+        resp.getWriter().println(".myOtherTable { background-color:#FFFFE0;border-collapse:collapse;color:#000;font-size:18px; }");
+        resp.getWriter().println(".myOtherTable th { background-color:#BDB76B;color:white;width:50%; }");
+        resp.getWriter().println(".myOtherTable td, .myOtherTable th { padding:5px;border:0; }");
+        resp.getWriter().println(".myOtherTable td { border-bottom:1px dotted #BDB76B; }");
+        resp.getWriter().println("</style>");
+
+
+
         try {
-            e1.leerRuta("src" + sSeparator + "main" + sSeparator + "java" + sSeparator + "com" + sSeparator + "ecos" + sSeparator + "ecosdeve1"+ sSeparator,sSeparator);//m
-            e2.leerRuta("src" + sSeparator + "main" + sSeparator + "java" + sSeparator + "com" + sSeparator + "ecos" + sSeparator + "ecosdeve2"+ sSeparator,sSeparator);//m
+            e1.leerRuta("src" + sSeparator + "main" + sSeparator + "java" + sSeparator + "com" + sSeparator + "ecos" + sSeparator + "ecosdeve1" + sSeparator, sSeparator);//m
+            e2.leerRuta("src" + sSeparator + "main" + sSeparator + "java" + sSeparator + "com" + sSeparator + "ecos" + sSeparator + "ecosdeve2" + sSeparator, sSeparator);//m
             resp.getWriter().println("Medicion de LOC");
-            resp.getWriter().println("<table style='width:100%'>");
+            resp.getWriter().println("<table class=\"myTable\">");
             resp.getWriter().println("<tr>");
             resp.getWriter().println("<td>Numero Programa</td>");
             resp.getWriter().println("<td>Tipo de parte</td>");
@@ -35,21 +50,58 @@ public class Main extends HttpServlet {
             resp.getWriter().println("<td>Total de la parte</td>");
             resp.getWriter().println("<td>Total tamaño</td>");
             resp.getWriter().println("</tr>");
-            for (int x = 0; x < e1.getNombreClases().size(); x++) {
-                resp.getWriter().println("<tr>");
-                resp.getWriter().println("<td>1</td>");
-                resp.getWriter().println("<td>Clase</td>");
-                resp.getWriter().println("<td>"+e1.getNombreClases().get(x).toString() +"</td>");
-                resp.getWriter().println("<td>Numero de items</td>");
-                resp.getWriter().println("<td>"+ e1.getContadorLocClases().get(x).toString() +"</td>");
-                resp.getWriter().println("<td></td>");
-                resp.getWriter().println("</tr>");
-            }
+            agregarPrograma(resp, e1,1);
+            agregarPrograma(resp, e2,2);
             resp.getWriter().println("</table>");
         } catch (Exception e) {
             resp.getWriter().print("Ocurrio un Error : " + e.getMessage());
         }
+    }
+    
+    private void agregarPrograma(HttpServletResponse resp,CalcularLoc e1,int numeroPrograma) throws Exception{
+        for (int x = 0; x < e1.getNombreClases().size(); x++) {
+                resp.getWriter().println("<tr>");
+                resp.getWriter().println("<td>"+numeroPrograma+"</td>");
+                resp.getWriter().println("<td>Clase</td>");
+                resp.getWriter().println("<td>" + e1.getNombreClases().get(x).toString() + "</td>");
+                resp.getWriter().println("<td>" + (e1.getNombreMetodos().get(x).size() + e1.getNombreAtributos().get(x).size()) + "</td>");
+                resp.getWriter().println("<td>" + e1.getContadorLocClases().get(x).toString() + "</td>");
+                resp.getWriter().println("<td></td>");
+                resp.getWriter().println("</tr>");
+                if (!e1.getNombreAtributos().get(x).isEmpty()) {
+                    for (int i = 0; i < e1.getNombreAtributos().get(x).size(); i++) {
+                        resp.getWriter().println("<tr>");
+                        resp.getWriter().println("<td></td>");
+                        resp.getWriter().println("<td>Atributo</td>");
+                        resp.getWriter().println("<td>               " + e1.getNombreAtributos().get(x).get(i).toString() + "</td>");
+                        resp.getWriter().println("<td></td>");
+                        resp.getWriter().println("<td></td>");
+                        resp.getWriter().println("<td></td>");
+                        resp.getWriter().println("</tr>");
+                    }
+                }
+                if (!e1.getNombreMetodos().get(x).isEmpty()) {
+                    for (int j = 0; j < e1.getNombreMetodos().get(x).size(); j++) {
+                        resp.getWriter().println("<tr>");
+                        resp.getWriter().println("<td></td>");
+                        resp.getWriter().println("<td>Metodo</td>");
+                        resp.getWriter().println("<td>                              " + e1.getNombreMetodos().get(x).get(j).toString() + "</td>");
+                        resp.getWriter().println("<td></td>");
+                        resp.getWriter().println("<td></td>");
+                        resp.getWriter().println("<td></td>");
+                        resp.getWriter().println("</tr>");
 
+                    }
+                }
+            }
+            resp.getWriter().println("<tr>");
+            resp.getWriter().println("<td>"+numeroPrograma+"</td>");
+            resp.getWriter().println("<td></td>");
+            resp.getWriter().println("<td></td>");
+            resp.getWriter().println("<td>Lineas Eliminadas : " + e1.getContadorLEli() + "</td>");
+            resp.getWriter().println("<td>Lineas Modificadas : " + e1.getContadorLMod() + "</td>");
+            resp.getWriter().println("<td>Total :" + e1.getContadorLoc().toString() + "</td>");
+            resp.getWriter().println("</tr>");
     }
 
     public static void main(String[] args) throws Exception {

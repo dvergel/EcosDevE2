@@ -26,18 +26,13 @@ public class CalcularLoc {
     private BigInteger contadorLMod = BigInteger.ZERO;
     private BigInteger contadorLEli = BigInteger.ZERO;
     private BigInteger contadorLoc = BigInteger.ZERO;
+    //d
     private List<BigInteger> contadorLocClases = new ArrayList<BigInteger>();
-    private List<BigInteger> contadorClases = new ArrayList<BigInteger>();
-    private List<BigInteger> contadorAtributos = new ArrayList<BigInteger>();
-    private List<BigInteger> contadorMetodos = new ArrayList<BigInteger>();
     private List<List<String>> nombreClases = new ArrayList<List<String>>();
     private List<List<String>> nombreMetodos = new ArrayList<List<String>>();
-    private List<List<List<String>>> parametrosMetodos = new ArrayList<List<List<String>>>();
     private List<List<String>> nombreAtributos = new ArrayList<List<String>>();
 
     public void leerRuta(String ruta, String separador) throws Exception {
-        try {
-
             File path = new File(ruta);
             String[] ficheros = path.list();
             FileInputStream fstream;
@@ -60,62 +55,54 @@ public class CalcularLoc {
                     entrada.close();
                 }
             }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
     }
 
     private void SumarVariables(String linea) {
         boolean flag = true;
-        Pattern pt = Pattern.compile("^(?![ \\s]*\\r?\\n|import|package|[ \\s]*}\\r?\\n|[ \\s]*//|[ \\s]*/\\*|[ \\s]*\\*).*\\r?\\n", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pt.matcher(linea);
-        while (matcher.find()) {
-            contadorLocClases.set(indexClass, contadorLocClases.get(indexClass).add(BigInteger.ONE));
-            contadorLoc.add(BigInteger.ONE);
-        }
+        Pattern pt;
+        Matcher matcher;
         if (flag) {
-            pt = Pattern.compile("(public\\s|private\\s|protected\\s)(class)+([\\s\\w]*\\s)+(\\w+)", Pattern.CASE_INSENSITIVE);
+            pt = Pattern.compile("(public\\s|private\\s|protected\\s)(class)\\s+([a-zA-Z0-9]+)", Pattern.CASE_INSENSITIVE);
             matcher = pt.matcher(linea);
             while (matcher.find()) {
                 indexClass++;
+                contadorLocClases.add(BigInteger.ZERO);
                 nombreClases.add(new ArrayList<String>());
                 nombreAtributos.add(new ArrayList<String>());
                 nombreMetodos.add(new ArrayList<String>());
-                contadorClases.add(BigInteger.ZERO);
-                contadorAtributos.add(BigInteger.ZERO);
-                contadorMetodos.add(BigInteger.ZERO);
-                parametrosMetodos.add(new ArrayList<List<String>>());
                 indexMetodos = 0;
-                contadorClases.add(indexClass, contadorClases.get(indexClass).add(BigInteger.ONE));
-                nombreClases.get(indexClass).add(matcher.group(1) + matcher.group(2)+ " " + matcher.group(4));
+                nombreClases.get(indexClass).add(matcher.group(1) + matcher.group(2)+ " " + matcher.group(3));
                 flag = false;
             }
         }
         if (flag) {
-            pt = Pattern.compile("(public\\s|private\\s|protected\\s)\\s*(?:readonly\\s+)?(?!class)([a-zA-Z0-9]*<?[a-zA-Z0-9]*>?+)\\s+(\\w+)", Pattern.CASE_INSENSITIVE);
+            pt = Pattern.compile("(public\\s|private\\s|protected\\s)\\s*(?:readonly\\s+)?(?:static\\s+)?(?!class)([a-zA-Z0-9]*<?[a-zA-Z0-9]*>?+)\\s+(\\w+)\\s?(=|;)", Pattern.CASE_INSENSITIVE);
             matcher = pt.matcher(linea);
             while (matcher.find()) {
-                contadorAtributos.add(indexClass, contadorAtributos.get(indexClass).add(BigInteger.ONE));
                 nombreAtributos.get(indexClass).add(matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3));
                 flag = false;
             }
         }
         if (flag) {
-            pt = Pattern.compile("(public\\s|private\\s|protected\\s|internal\\s)?([\\s\\w]*)\\s+(\\w+)\\s*\\(\\s*(?:(ref\\s|in\\s|out\\s)?\\s*(\\w+)\\s+(\\w+)\\s*,?\\s*)+\\)", Pattern.CASE_INSENSITIVE);
+            pt = Pattern.compile("(public\\s|private\\s|protected\\s)\\s*(?:readonly\\s+)?(?:static\\s+)?(?!class)([a-zA-Z0-9]*<?[a-zA-Z0-9]*>?+)\\s+(\\w+)\\s?\\(", Pattern.MULTILINE);
             matcher = pt.matcher(linea);
             while (matcher.find()) {
                 indexMetodos++;
-                contadorMetodos.add(indexClass, contadorMetodos.get(indexClass).add(BigInteger.ONE));
                 nombreMetodos.get(indexClass).add(matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3));
-                parametrosMetodos.get(indexClass).get(indexMetodos).add(matcher.group(4) + " " + matcher.group(5));
                 flag = false;
             }
         }
+        pt = Pattern.compile("^(?!\\s*$|\\s?import|\\s?package|[ \\s]*}$|[ \\s]*\\/\\/|[ \\s]*\\/\\*|[ \\s]*\\*)(.*)", Pattern.CASE_INSENSITIVE);
+        matcher = pt.matcher(linea);
+        while (matcher.find()) {
+            contadorLocClases.set(indexClass, contadorLocClases.get(indexClass).add(BigInteger.ONE));
+            setContadorLoc(contadorLoc.add(BigInteger.ONE));
+        }
         if (linea.toLowerCase().contains("//m")) {
-            contadorLMod.add(BigInteger.ONE);
+            setContadorLMod(contadorLMod.add(BigInteger.ONE));
         }
         if (linea.toLowerCase().contains("//e")) {
-            contadorLEli.add(BigInteger.ONE);
+            setContadorLEli(contadorLEli.add(BigInteger.ONE));
         }
     }
 
@@ -127,29 +114,7 @@ public class CalcularLoc {
         this.contadorLoc = contadorLoc;
     }
 
-    public List<BigInteger> getContadorClases() {
-        return contadorClases;
-    }
-
-    public void setContadorClases(List<BigInteger> contadorClases) {
-        this.contadorClases = contadorClases;
-    }
-
-    public List<BigInteger> getContadorAtributos() {
-        return contadorAtributos;
-    }
-
-    public void setContadorAtributos(List<BigInteger> contadorAtributos) {
-        this.contadorAtributos = contadorAtributos;
-    }
-
-    public List<BigInteger> getContadorMetodos() {
-        return contadorMetodos;
-    }
-
-    public void setContadorMetodos(List<BigInteger> contadorMetodos) {
-        this.contadorMetodos = contadorMetodos;
-    }
+    //d
 
     public List<List<String>> getNombreClases() {
         return nombreClases;
@@ -165,14 +130,6 @@ public class CalcularLoc {
 
     public void setNombreMetodos(List<List<String>> nombreMetodos) {
         this.nombreMetodos = nombreMetodos;
-    }
-
-    public List<List<List<String>>> getParametrosMetodos() {
-        return parametrosMetodos;
-    }
-
-    public void setParametrosMetodos(List<List<List<String>>> parametrosMetodos) {
-        this.parametrosMetodos = parametrosMetodos;
     }
 
     public List<List<String>> getNombreAtributos() {
