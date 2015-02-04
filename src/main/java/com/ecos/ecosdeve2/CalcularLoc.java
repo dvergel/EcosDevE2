@@ -45,7 +45,7 @@ public class CalcularLoc {
             } else {
                 for (int x = 0; x < ficheros.length; x++) {
                     if (ficheros[x].isDirectory()) {
-                        leerRuta(ruta, separador);
+                        leerRuta(ruta + separador+ ficheros[x].getName(), separador);
                     } else {
                         if (ficheros[x].getName().toLowerCase().contains(".java")) {
                             fstream = new FileInputStream(ruta + separador + ficheros[x].getName());//m
