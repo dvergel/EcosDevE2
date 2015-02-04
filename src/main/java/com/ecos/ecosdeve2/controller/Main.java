@@ -2,6 +2,8 @@ package com.ecos.ecosdeve2.controller;
 
 import com.ecos.ecosdeve2.CalcularLoc;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import org.eclipse.jetty.server.Server;
@@ -107,14 +109,17 @@ public class Main extends HttpServlet {
     }
 
     public static void main(String[] args) throws Exception {
-        //new Server(Integer.valueOf(System.getenv("PORT")));
-        Server server = new Server(Integer.valueOf(System.getenv("PORT")));
+         Server server = new Server(Integer.valueOf(System.getenv("PORT")));
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         server.setHandler(context);
         context.addServlet(new ServletHolder(new Main()), "/*");
-        server.start();
-        server.join();
+        try {
+            server.start();
+            server.join();
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public String getsDirectorioTrabajo() {
