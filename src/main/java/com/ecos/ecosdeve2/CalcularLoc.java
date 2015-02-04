@@ -31,32 +31,35 @@ public class CalcularLoc {
     private List<List<String>> nombreClases = new ArrayList<List<String>>();
     private List<List<String>> nombreMetodos = new ArrayList<List<String>>();
     private List<List<String>> nombreAtributos = new ArrayList<List<String>>();
+    private FileInputStream fstream;
+    private DataInputStream entrada = null;
+    private BufferedReader buffer;
+    private String strLinea = null;
 
     public void leerRuta(String ruta, String separador) throws Exception {
-        try{
+        try {
             File path = new File(ruta);
-            String[] ficheros = path.list();
-            FileInputStream fstream;
-            DataInputStream entrada = null;
-            BufferedReader buffer;
-            String strLinea = null;
+            File[] ficheros = path.listFiles();
             if (ficheros == null) {
                 System.out.println("No hay ficheros en el directorio especificado");
             } else {
-
                 for (int x = 0; x < ficheros.length; x++) {
-                    if (ficheros[x].toLowerCase().contains(".java")) {
-                        fstream = new FileInputStream(ruta + separador + ficheros[x]);//m
-                        entrada = new DataInputStream(fstream);
-                        buffer = new BufferedReader(new InputStreamReader(entrada));
-                        while ((strLinea = buffer.readLine()) != null) {
-                            SumarVariables(strLinea);
+                    if (ficheros[x].isDirectory()) {
+                        leerRuta(ruta, separador);
+                    } else {
+                        if (ficheros[x].getName().toLowerCase().contains(".java")) {
+                            fstream = new FileInputStream(ruta + separador + ficheros[x].getName());//m
+                            entrada = new DataInputStream(fstream);
+                            buffer = new BufferedReader(new InputStreamReader(entrada));
+                            while ((strLinea = buffer.readLine()) != null) {
+                                SumarVariables(strLinea);
+                            }
+                            entrada.close();
                         }
                     }
-                    entrada.close();
                 }
             }
-            } catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Ocurrio un Error : " + e.getMessage());
         }
     }
@@ -75,7 +78,7 @@ public class CalcularLoc {
                 nombreAtributos.add(new ArrayList<String>());
                 nombreMetodos.add(new ArrayList<String>());
                 indexMetodos = 0;
-                nombreClases.get(indexClass).add(matcher.group(1) + matcher.group(2)+ " " + matcher.group(3));
+                nombreClases.get(indexClass).add(matcher.group(1) + matcher.group(2) + " " + matcher.group(3));
                 flag = false;
             }
         }
@@ -119,7 +122,6 @@ public class CalcularLoc {
     }
 
     //d
-
     public List<List<String>> getNombreClases() {
         return nombreClases;
     }
