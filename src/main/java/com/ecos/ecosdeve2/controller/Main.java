@@ -1,5 +1,6 @@
-package com.ecos.ecosdeve2;
+package com.ecos.ecosdeve2.controller;
 
+import com.ecos.ecosdeve2.CalcularLoc;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
