@@ -33,6 +33,7 @@ public class CalcularLoc {
     private List<List<String>> nombreAtributos = new ArrayList<List<String>>();
 
     public void leerRuta(String ruta, String separador) throws Exception {
+        try{
             File path = new File(ruta);
             String[] ficheros = path.list();
             FileInputStream fstream;
@@ -55,6 +56,9 @@ public class CalcularLoc {
                     entrada.close();
                 }
             }
+            } catch (Exception e) {
+            System.out.println("Ocurrio un Error : " + e.getMessage());
+        }
     }
 
     private void SumarVariables(String linea) {
