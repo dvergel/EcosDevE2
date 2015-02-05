@@ -48,7 +48,8 @@ public class MainView {
             resp.getWriter().println("<td>Numero Programa</td>");
             resp.getWriter().println("<td>Tipo de parte</td>");
             resp.getWriter().println("<td>Acceso, tipo, Nombre de parte</td>");
-            resp.getWriter().println("<td>Numero de items</td>");
+            resp.getWriter().println("<td>Numero de Atributos</td>");
+            resp.getWriter().println("<td>Numero de Metodos</td>");
             resp.getWriter().println("<td>Total de la parte</td>");
             resp.getWriter().println("<td>Total tamaño</td>");
             resp.getWriter().println("</tr>");
@@ -66,7 +67,8 @@ public class MainView {
                 resp.getWriter().println("<td>"+numeroPrograma+"</td>");
                 resp.getWriter().println("<td>Clase</td>");
                 resp.getWriter().println("<td>" + e1.getNombreClases().get(x).toString() + "</td>");
-                resp.getWriter().println("<td>" + (e1.getNombreMetodos().get(x).size() + e1.getNombreAtributos().get(x).size()) + "</td>");
+                resp.getWriter().println("<td>" + e1.getNombreAtributos().get(x).size() + "</td>");
+                resp.getWriter().println("<td>" + e1.getNombreMetodos().get(x).size() + "</td>");
                 resp.getWriter().println("<td>" + e1.getContadorLocClases().get(x).toString() + "</td>");
                 resp.getWriter().println("<td></td>");
                 resp.getWriter().println("</tr>");
