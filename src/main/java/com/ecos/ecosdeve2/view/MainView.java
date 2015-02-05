@@ -81,6 +81,7 @@ public class MainView {
                         resp.getWriter().println("<td></td>");
                         resp.getWriter().println("<td></td>");
                         resp.getWriter().println("<td></td>");
+                        resp.getWriter().println("<td></td>");
                         resp.getWriter().println("</tr>");
                     }
                 }
@@ -90,6 +91,7 @@ public class MainView {
                         resp.getWriter().println("<td></td>");
                         resp.getWriter().println("<td>Metodo</td>");
                         resp.getWriter().println("<td>                              " + e1.getNombreMetodos().get(x).get(j).toString() + "</td>");
+                        resp.getWriter().println("<td></td>");
                         resp.getWriter().println("<td></td>");
                         resp.getWriter().println("<td></td>");
                         resp.getWriter().println("<td></td>");
