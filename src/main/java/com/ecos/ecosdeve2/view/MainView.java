@@ -102,6 +102,7 @@ public class MainView {
             resp.getWriter().println("<td>"+numeroPrograma+"</td>");
             resp.getWriter().println("<td></td>");
             resp.getWriter().println("<td></td>");
+            resp.getWriter().println("<td></td>");
             resp.getWriter().println("<td>Lineas Eliminadas : " + e1.getContadorLEli() + "</td>");
             resp.getWriter().println("<td>Lineas Modificadas : " + e1.getContadorLMod() + "</td>");
             resp.getWriter().println("<td>Total :" + e1.getContadorLoc().toString() + "</td>");
